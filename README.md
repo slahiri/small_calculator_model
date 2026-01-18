@@ -1,6 +1,10 @@
 # Calculator LLM
 
-A tiny LLM that converts English math phrases to answers.
+A tiny LLM that converts English math phrases to answers. Built from scratch to learn how language models work.
+
+**Tutorial:** [Build Your First LLM](https://sid.sh/learn/build-your-first-llm)
+
+**Demo:** [Hugging Face Space](https://huggingface.co/spaces/slahiri/small_calculator_model)
 
 ## What it does
 
