@@ -1,6 +1,6 @@
-# Calculator LLM - Part 3: Tokenization & Embeddings
+# Calculator LLM
 
-A tiny LLM that converts English math phrases to answers. This module implements the tokenization and embedding layers.
+A tiny LLM that converts English math phrases to answers.
 
 ## What it does
 
