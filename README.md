@@ -1,98 +1,97 @@
-# Calculator LLM
+# 🧮 Calculator LLM
 
-A tiny LLM that converts English math phrases to answers. Built from scratch to learn how language models work.
+A tiny transformer model (~105K parameters) that solves English math problems, built from scratch.
 
-**Tutorial:** [Build Your First LLM](https://sid.sh/learn/build-your-first-llm)
+[![Train and Deploy](https://github.com/slahiri/small_calculator_model/actions/workflows/train-and-deploy.yml/badge.svg)](https://github.com/slahiri/small_calculator_model/actions/workflows/train-and-deploy.yml)
+[![Hugging Face Space](https://img.shields.io/badge/🤗-Live%20Demo-yellow)](https://huggingface.co/spaces/slahiri/small_calculator_model)
 
-**Demo:** [Hugging Face Space](https://huggingface.co/spaces/slahiri/small_calculator_model)
+## Live Demo
 
-## What it does
+Try it out: [huggingface.co/spaces/slahiri/small_calculator_model](https://huggingface.co/spaces/slahiri/small_calculator_model)
 
-Converts text like:
-```
-"two plus three" -> "five"
-"seven minus four" -> "three"
-"six times eight" -> "forty eight"
+## Quick Start
+
+```bash
+# Clone the repo
+git clone https://github.com/slahiri/small_calculator_model
+cd small_calculator_model
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Train the model
+cd src
+python train.py --output ../output
+
+# Test inference
+python generate.py ../output "two plus three"
+# Output: two plus three = five
 ```
 
 ## Project Structure
 
 ```
-calculator-llm/
+small_calculator_model/
+├── .github/workflows/
+│   └── train-and-deploy.yml    # CI/CD: train on push, deploy to HF
 ├── src/
-│   ├── __init__.py
-│   ├── tokenizer.py      # Vocabulary + Tokenizer class
-│   └── embeddings.py     # Embedding + PositionalEncoding + InputEmbedding
-├── tests/
-│   ├── __init__.py
-│   ├── test_tokenizer.py
-│   └── test_embeddings.py
-├── requirements.txt
-└── README.md
+│   ├── model.py                # Transformer architecture
+│   ├── tokenizer.py            # Text ↔ token ID conversion
+│   ├── data.py                 # Training data generation
+│   ├── train.py                # Training script
+│   └── generate.py             # Inference utilities
+├── config/
+│   ├── config.json             # Model hyperparameters
+│   └── vocab.json              # 36-token vocabulary
+├── app/
+│   ├── app.py                  # Gradio demo for HF Space
+│   ├── requirements.txt        # HF Space dependencies
+│   └── README.md               # HF Space metadata
+├── notebooks/
+│   └── full_calculator_llm.ipynb  # Tutorial notebook
+└── requirements.txt            # Training dependencies
 ```
 
-## Installation
+## Model Architecture
 
-```bash
-pip install -r requirements.txt
-```
+| Property | Value |
+|----------|-------|
+| Type | Decoder-only Transformer |
+| Parameters | ~105K |
+| Layers | 2 transformer blocks |
+| Embedding Dim | 64 |
+| Attention Heads | 4 |
+| FF Dim | 256 |
+| Vocabulary | 36 tokens |
+| Max Sequence | 16 tokens |
 
-## Running Tests
+## Training
 
-```bash
-# Run tokenizer tests
-python tests/test_tokenizer.py
+The model trains on ~97K examples covering:
+- **Addition**: `a + b` where `a + b ≤ 99`
+- **Subtraction**: `a - b` where `a - b ≥ 0`
+- **Multiplication**: `a × b` where `a × b ≤ 99`
 
-# Run embedding tests
-python tests/test_embeddings.py
-```
+Test accuracy: **~99%** on held-out test set (no overlap with training).
 
-## Usage
+## CI/CD Pipeline
 
-### Tokenizer
+On push to `main`:
+1. **Train**: Run training on GitHub Actions (CPU, ~50 mins)
+2. **Validate**: Ensure test accuracy ≥ 95%
+3. **Deploy**: Push model to Hugging Face Space
 
-```python
-from src.tokenizer import Tokenizer
+### Setup
 
-tokenizer = Tokenizer()
+Add `HF_TOKEN` to your repository secrets:
+1. Go to [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+2. Create a token with write access
+3. Add to GitHub: Settings → Secrets → Actions → `HF_TOKEN`
 
-# Encode text to token IDs
-tokenizer.encode("two plus three")  # [5, 31, 6]
+## Tutorial
 
-# Decode token IDs to text
-tokenizer.decode([8])  # "five"
+This model was built following: [sid.sh/learn/build-your-first-llm](https://sid.sh/learn/build-your-first-llm)
 
-# Convert numbers to/from words
-tokenizer.num_to_words(42)  # "forty two"
-tokenizer.words_to_num("forty two")  # 42
-```
+## License
 
-### Embeddings
-
-```python
-from src.embeddings import InputEmbedding
-import torch
-
-# Create embedding layer
-input_emb = InputEmbedding(vocab_size=36, embed_dim=64, max_seq_len=32)
-
-# Convert token IDs to embeddings
-token_ids = torch.tensor([[5, 31, 6]])  # "two plus three"
-embeddings = input_emb(token_ids)
-print(embeddings.shape)  # torch.Size([1, 3, 64])
-```
-
-## Vocabulary
-
-36 tokens total:
-- Special: `[PAD]`, `[START]`, `[END]`
-- Numbers 0-19: `zero`, `one`, ... `nineteen`
-- Tens: `twenty`, `thirty`, ... `ninety`
-- Operations: `plus`, `minus`, `times`, `divided`, `by`
-
-## Model Configuration
-
-- Vocabulary size: 36
-- Embedding dimension: 64
-- Max sequence length: 32
-- Total embedding parameters: 4,352
+MIT

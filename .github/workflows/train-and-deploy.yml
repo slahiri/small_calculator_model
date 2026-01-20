@@ -1,0 +1,108 @@
+name: Train and Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - '.github/workflows/train-and-deploy.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90  # CPU training takes ~50 mins
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Train model
+        run: |
+          cd src
+          python train.py \
+            --config ../config/config.json \
+            --vocab ../config/vocab.json \
+            --output ../output \
+            --epochs 100 \
+            --min-accuracy 0.95
+
+      - name: Upload training artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: |
+            output/model.pt
+            output/config.json
+            output/vocab.json
+            output/training_data.json
+            output/test_data.json
+          retention-days: 30
+
+  deploy:
+    needs: train
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download training artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts
+          path: output
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Prepare HF Space files
+        run: |
+          mkdir -p hf_space
+          cp app/app.py hf_space/
+          cp app/requirements.txt hf_space/
+          cp app/README.md hf_space/
+          cp output/model.pt hf_space/
+          cp output/config.json hf_space/
+          cp output/vocab.json hf_space/
+
+      - name: Deploy to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          import os
+
+          api = HfApi(token=os.environ['HF_TOKEN'])
+          api.upload_folder(
+              folder_path='hf_space',
+              repo_id='slahiri/small_calculator_model',
+              repo_type='space',
+          )
+          print('Deployed to https://huggingface.co/spaces/slahiri/small_calculator_model')
+          "
+
+      - name: Summary
+        run: |
+          echo "## Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Model deployed to: https://huggingface.co/spaces/slahiri/small_calculator_model" >> $GITHUB_STEP_SUMMARY
