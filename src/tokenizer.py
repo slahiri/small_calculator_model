@@ -35,7 +35,6 @@ class Tokenizer:
         text = text.replace("+", " plus ")
         text = text.replace("-", " minus ")
         text = text.replace("*", " times ")
-        text = text.replace("x", " times ")
         text = text.replace("=", " equals ")
 
         # Split compound numbers (e.g., "twentyfive" -> "twenty five")
