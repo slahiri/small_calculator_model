@@ -12,7 +12,7 @@ on:
 jobs:
   train:
     runs-on: ubuntu-latest
-    timeout-minutes: 90  # CPU training takes ~50 mins
+    timeout-minutes: 120  # CPU training takes ~60-90 mins
 
     steps:
       - name: Checkout code
@@ -36,7 +36,7 @@ jobs:
             --config ../config/config.json \
             --vocab ../config/vocab.json \
             --output ../output \
-            --epochs 100 \
+            --epochs 200 \
             --min-accuracy 0.95
 
       - name: Upload training artifacts
