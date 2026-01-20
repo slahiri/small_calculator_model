@@ -68,23 +68,31 @@ class MultiHeadAttention(nn.Module):
         return self.out_proj(out)
 
 
+class FeedForward(nn.Module):
+    def __init__(self, embed_dim, ff_dim, dropout=0.1):
+        super().__init__()
+        self.linear1 = nn.Linear(embed_dim, ff_dim)
+        self.linear2 = nn.Linear(ff_dim, embed_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        return self.linear2(self.dropout(F.relu(self.linear1(x))))
+
+
 class TransformerBlock(nn.Module):
     def __init__(self, embed_dim, num_heads, ff_dim, dropout=0.1):
         super().__init__()
-        self.attn = MultiHeadAttention(embed_dim, num_heads, dropout)
-        self.ff = nn.Sequential(
-            nn.Linear(embed_dim, ff_dim),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(ff_dim, embed_dim),
-        )
+        self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
+        self.feed_forward = FeedForward(embed_dim, ff_dim, dropout)
         self.norm2 = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, mask=None):
-        x = self.norm1(x + self.dropout(self.attn(x, mask)))
-        x = self.norm2(x + self.dropout(self.ff(x)))
+        attn_output = self.attention(x, mask)
+        x = self.norm1(x + self.dropout(attn_output))
+        ff_output = self.feed_forward(x)
+        x = self.norm2(x + self.dropout(ff_output))
         return x
 
 
@@ -97,14 +105,14 @@ class CalculatorLLM(nn.Module):
             for _ in range(num_layers)
         ])
         self.norm = nn.LayerNorm(embed_dim)
-        self.out = nn.Linear(embed_dim, vocab_size)
+        self.output_proj = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, x):
         mask = torch.tril(torch.ones(x.size(1), x.size(1))).unsqueeze(0).unsqueeze(0).to(x.device)
         x = self.embedding(x)
         for layer in self.layers:
             x = layer(x, mask)
-        return self.out(self.norm(x))
+        return self.output_proj(self.norm(x))
 
 
 # Tokenizer
