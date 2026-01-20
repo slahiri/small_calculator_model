@@ -3,6 +3,8 @@ Calculator LLM Model Architecture
 
 A tiny decoder-only transformer for solving English math problems.
 Built from scratch following: https://sid.sh/learn/build-your-first-llm
+
+Model: 105K parameters, 64 embed_dim, 4 heads, 2 layers
 """
 
 import math
