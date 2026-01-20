@@ -8,57 +8,110 @@ sdk_version: "5.9.1"
 app_file: app.py
 pinned: false
 license: mit
+language:
+  - en
+tags:
+  - transformer
+  - educational
+  - math
+  - from-scratch
+datasets:
+  - custom
+pipeline_tag: text-generation
 ---
 
-# 🧮 Calculator LLM
+# Calculator LLM
 
-A tiny transformer model (~105K parameters) that solves English math problems.
+A tiny decoder-only transformer (105K parameters) that performs arithmetic in English.
 
-## Try It
+## Model Description
 
-Enter a math problem in English like:
-- "two plus three"
-- "seven times eight"
-- "twenty minus five"
+Calculator LLM is an educational GPT-style model built from scratch. It learns to solve math problems expressed in English words, outputting answers in English.
 
-The model will output the answer in English!
+- **Developed by:** [Siddhartha Lahiri](https://sid.sh)
+- **Model type:** Decoder-only Transformer
+- **Language:** English
+- **License:** MIT
+- **Tutorial:** [Build Your First LLM](https://sid.sh/learn/build-your-first-llm)
+- **Repository:** [GitHub](https://github.com/slahiri/small_calculator_model)
 
-## Examples
+## Uses
 
-| Input | Output |
-|-------|--------|
-| two plus three | five |
-| seven times eight | fifty six |
-| twenty minus five | fifteen |
-| nine times nine | eighty one |
+### Direct Use
 
-## Built From Scratch
+Text generation for simple arithmetic:
 
-This model was built following the tutorial at [sid.sh/learn/build-your-first-llm](https://sid.sh/learn/build-your-first-llm)
+```python
+Input:  "two plus three"      →  Output: "five"
+Input:  "seven times eight"   →  Output: "fifty six"
+Input:  "ninety minus forty"  →  Output: "fifty"
+```
 
-Same architecture as GPT (attention, feed-forward, transformer blocks), just much smaller!
+### Intended Use
 
-## Model Details
+- Educational demonstration of transformer architecture
+- Learning how LLMs work from scratch
+- Experimentation with small-scale language models
 
-| Property | Value |
-|----------|-------|
-| Parameters | ~105K |
-| Layers | 2 transformer blocks |
-| Embedding | 64 dimensions |
+### Limitations
+
+- Limited to numbers 0-99
+- Only supports: addition, subtraction, multiplication
+- English words only (not digits)
+- ~99% accuracy (not 100%)
+
+## Training
+
+### Training Data
+
+~97,000 examples generated programmatically covering all valid combinations:
+- Addition: a + b where result ≤ 99
+- Subtraction: a - b where result ≥ 0
+- Multiplication: a × b where result ≤ 99
+
+10% held out for testing (no overlap).
+
+### Training Procedure
+
+- **Epochs:** 100
+- **Optimizer:** AdamW (lr=0.001, weight_decay=0.01)
+- **Scheduler:** Cosine annealing
+- **Hardware:** CPU (~50 min) or GPU (~2 min)
+
+## Evaluation
+
+| Metric | Value |
+|--------|-------|
+| Test Accuracy | ~99% |
+| Test Set Size | 1,078 |
+
+## Technical Specifications
+
+### Architecture
+
+| | |
+|---|---|
+| Parameters | 104,740 |
+| Layers | 2 |
 | Attention Heads | 4 |
+| Embedding Dim | 64 |
+| FF Dim | 256 |
 | Vocabulary | 36 tokens |
-| Operations | plus, minus, times |
-| Number Range | 0-99 |
+| Context Length | 16 tokens |
+| Positional Encoding | Sinusoidal |
 
-## Architecture
+### Compute
 
-This is a decoder-only transformer with:
-- Token embeddings + sinusoidal positional encoding
-- 2 transformer blocks (multi-head attention + feed-forward)
-- Causal masking for autoregressive generation
-- Layer normalization and residual connections
+- **Training:** ~50 min on CPU, ~2 min on GPU
+- **Inference:** <10ms per query
 
-## Links
+## Citation
 
-- 📚 [Tutorial: Build Your First LLM](https://sid.sh/learn/build-your-first-llm)
-- 💻 [Source Code on GitHub](https://github.com/slahiri/small_calculator_model)
+```bibtex
+@misc{calculatorllm2024,
+  author = {Lahiri, Siddhartha},
+  title = {Calculator LLM: A Tiny Transformer for English Math},
+  year = {2024},
+  url = {https://github.com/slahiri/small_calculator_model}
+}
+```
