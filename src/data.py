@@ -75,16 +75,19 @@ def generate_all_combinations() -> list[dict]:
 
 
 def generate_train_test_split(
-    test_ratio: float = 0.1,
     train_multiplier: int = 10,
+    test_size: int = 500,
     seed: int = 42,
 ) -> tuple[list[dict], list[dict]]:
     """
-    Generate training and test data with no overlap.
+    Generate training and test data.
+
+    Training includes ALL valid combinations (repeated).
+    Test is a random sample (may overlap with training - that's OK for this demo).
 
     Args:
-        test_ratio: Fraction of unique combinations to hold out for testing
         train_multiplier: How many times to duplicate training data
+        test_size: Number of test examples to generate
         seed: Random seed for reproducibility
 
     Returns:
@@ -92,26 +95,23 @@ def generate_train_test_split(
     """
     random.seed(seed)
 
-    # Generate all unique combinations
+    # Generate all unique combinations for training
     all_data = generate_all_combinations()
-    random.shuffle(all_data)
 
-    # Split
-    split_idx = int(len(all_data) * (1 - test_ratio))
-    train_unique = all_data[:split_idx]
-    test_data = all_data[split_idx:]
-
-    # Duplicate training data
-    train_data = train_unique * train_multiplier
+    # Training: all combinations repeated
+    train_data = all_data * train_multiplier
     random.shuffle(train_data)
+
+    # Test: random sample from all combinations
+    test_data = random.sample(all_data, min(test_size, len(all_data)))
 
     return train_data, test_data
 
 
 def save_data(
     output_dir: str | Path,
-    test_ratio: float = 0.1,
     train_multiplier: int = 10,
+    test_size: int = 500,
     seed: int = 42,
 ) -> tuple[int, int]:
     """
@@ -124,8 +124,8 @@ def save_data(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     train_data, test_data = generate_train_test_split(
-        test_ratio=test_ratio,
         train_multiplier=train_multiplier,
+        test_size=test_size,
         seed=seed,
     )
 
