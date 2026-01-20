@@ -5,7 +5,6 @@ https://sid.sh/learn/build-your-first-llm
 
 import json
 import math
-from pathlib import Path
 
 import gradio as gr
 import torch
@@ -150,14 +149,14 @@ print("Ready!")
 # Inference
 
 def solve(problem):
-    if not problem.strip():
+    if not problem or not problem.strip():
         return ""
 
     problem = problem.lower().strip()
     if not problem.endswith("equals"):
         problem += " equals"
 
-    tokens = tokenizer.encode(problem)[:-1]  # Remove END token
+    tokens = tokenizer.encode(problem)[:-1]
     input_ids = torch.tensor([tokens])
 
     with torch.no_grad():
@@ -174,19 +173,52 @@ def solve(problem):
 
 # Gradio UI
 
-demo = gr.Interface(
-    fn=solve,
-    inputs=gr.Textbox(label="Problem", placeholder="two plus three"),
-    outputs=gr.Textbox(label="Answer"),
-    title="Calculator LLM",
-    description="A 105K parameter transformer that solves English math problems. Try: two plus three, seven times eight, ninety minus forty five",
-    examples=[
-        ["two plus three"],
-        ["seven times eight"],
-        ["ninety minus forty five"],
-        ["nine times nine"],
-    ],
-)
+with gr.Blocks(title="Calculator LLM") as demo:
+    gr.Markdown(
+        """
+        # Calculator LLM
+
+        A 105K parameter transformer that solves English math problems.
+        [[model]](https://github.com/slahiri/small_calculator_model) [[tutorial]](https://sid.sh/learn/build-your-first-llm)
+        """
+    )
+
+    with gr.Row():
+        with gr.Column(scale=1):
+            problem_input = gr.Textbox(
+                label="",
+                placeholder="Enter your problem",
+                lines=1,
+                show_label=False,
+            )
+            run_btn = gr.Button("Run", variant="primary")
+
+        with gr.Column(scale=1):
+            answer_output = gr.Textbox(
+                label="",
+                placeholder="Answer will appear here",
+                lines=1,
+                show_label=False,
+                interactive=False,
+            )
+
+    gr.Examples(
+        examples=[
+            ["two plus three"],
+            ["seven times eight"],
+            ["ninety minus forty five"],
+            ["nine times nine"],
+            ["twenty plus thirty"],
+            ["eighty one minus forty"],
+        ],
+        inputs=problem_input,
+        outputs=answer_output,
+        fn=solve,
+        cache_examples=True,
+    )
+
+    run_btn.click(fn=solve, inputs=problem_input, outputs=answer_output)
+    problem_input.submit(fn=solve, inputs=problem_input, outputs=answer_output)
 
 if __name__ == "__main__":
     demo.launch()
