@@ -59,6 +59,11 @@ python generate.py ../output "two plus three"
 | Vocabulary | 36 tokens |
 | Context Length | 16 tokens |
 
+## Limitations
+
+1. **Number range**: Trained on numbers 0-99 only. Inputs or results greater than 99 will produce errors or hallucinations.
+2. **Accuracy**: ~98% on test set. This is a small model trained on a limited corpus for educational purposes.
+
 ## Data
 
 ~97K training examples covering:
@@ -66,7 +71,7 @@ python generate.py ../output "two plus three"
 - **Subtraction**: a - b where result ≥ 0
 - **Multiplication**: a × b where result ≤ 99
 
-10% held out for testing. Expected accuracy: ~99%.
+10% held out for testing.
 
 ## Structure
 

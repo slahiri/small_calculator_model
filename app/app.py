@@ -188,6 +188,10 @@ with gr.Blocks(title="Calculator LLM") as demo:
 
         A 105K parameter transformer that solves English math problems.
         [[model]](https://github.com/slahiri/small_calculator_model) [[tutorial]](https://sid.sh/learn/build-your-first-llm)
+
+        **Limitations:**
+        - Trained on numbers 0-99 only. Inputs or results >99 may produce errors.
+        - Test accuracy: ~98% (trained on a small corpus).
         """
     )
 
