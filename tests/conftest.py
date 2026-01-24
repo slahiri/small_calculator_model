@@ -1,0 +1,24 @@
+"""Pytest configuration and shared fixtures."""
+
+import pytest
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+
+
+@pytest.fixture
+def vocab():
+    """Standard calculator vocabulary."""
+    return {
+        "[PAD]": 0, "[START]": 1, "[END]": 2, "[UNK]": 3,
+        "zero": 4, "one": 5, "two": 6, "three": 7, "four": 8,
+        "five": 9, "six": 10, "seven": 11, "eight": 12, "nine": 13,
+        "ten": 14, "eleven": 15, "twelve": 16, "thirteen": 17,
+        "fourteen": 18, "fifteen": 19, "sixteen": 20, "seventeen": 21,
+        "eighteen": 22, "nineteen": 23,
+        "twenty": 24, "thirty": 25, "forty": 26, "fifty": 27,
+        "sixty": 28, "seventy": 29, "eighty": 30, "ninety": 31,
+        "plus": 32, "minus": 33, "times": 34, "equals": 35,
+    }
