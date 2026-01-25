@@ -229,7 +229,7 @@ with gr.Blocks(title="Calculator LLM") as demo:
         cache_examples=True,
     )
 
-    run_btn.click(fn=solve, inputs=problem_input, outputs=answer_output)
+    run_btn.click(fn=solve, inputs=problem_input, outputs=answer_output, api_name="solve")
     problem_input.submit(fn=solve, inputs=problem_input, outputs=answer_output)
 
 if __name__ == "__main__":
